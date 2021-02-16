@@ -42,8 +42,9 @@ def get_category_dict(ann_file):
     with open(ann_file, 'rb') as json_file:
         data = json.load(json_file)
         for c in data['categories']:
-            category_dict[int(c['id'])] = c['name']
+            category_dict[int(c['id'])] = c
 
+    # print(category_dict)
     return category_dict
 
 def save_model(model, path):
