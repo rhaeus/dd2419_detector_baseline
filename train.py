@@ -38,6 +38,8 @@ def train(device="cpu"):
         transforms=detector.input_transform,
     )
 
+    self.category_dict = utils.get_category_dict('./dd2419_coco/annotations/training.json')
+
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=8, shuffle=True)
 
     # training params
@@ -139,7 +141,7 @@ def train(device="cpu"):
                         )
 
                         # add bounding boxes
-                        utils.add_bounding_boxes(ax, bbs[i])
+                        utils.add_bounding_boxes(ax, bbs[i], self.category_dict)
 
                         wandb.log(
                             {"test_img_{i}".format(i=i): figure}, step=current_iteration
