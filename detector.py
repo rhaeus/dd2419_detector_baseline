@@ -100,6 +100,7 @@ class Detector(nn.Module):
                 )
 
                 category_one_hot = bb_coeffs = o[5:19, bb_index[0], bb_index[1]]
+                print("category_one_hot", category_one_hot)
                 category = np.argmax(category_one_hot)
 
                 img_bbs.append(
