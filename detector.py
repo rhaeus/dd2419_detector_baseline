@@ -8,6 +8,8 @@ import torch.nn as nn
 from torchvision import models
 from torchvision import transforms
 
+import numpy as np
+
 
 class Detector(nn.Module):
     """Baseline module for object detection."""
@@ -22,8 +24,10 @@ class Detector(nn.Module):
         self.features = models.mobilenet_v2(pretrained=True).features
         # output of mobilenet_v2 will be 1280x15x20 for 480x640 input images
 
+        self.head_out_channels = 20
+
         self.head = nn.Conv2d(
-            in_channels=1280, out_channels=5, kernel_size=1
+            in_channels=1280, out_channels=self.head_out_channels, kernel_size=1
         )
         # 1x1 Convolution to reduce channels to out_channels without changing H and W
 
@@ -36,6 +40,7 @@ class Detector(nn.Module):
         self.out_cells_y = 15.0
         self.img_height = 480.0
         self.img_width = 640.0
+        
 
     def forward(self, inp):
         """Forward pass.
@@ -94,12 +99,16 @@ class Detector(nn.Module):
                     - width / 2.0
                 )
 
+                category_one_hot = bb_coeffs = o[5:19, bb_index[0], bb_index[1]]
+                category = np.argmax(category_one_hot)
+
                 img_bbs.append(
                     {
                         "width": width,
                         "height": height,
                         "x": x,
                         "y": y,
+                        "category": category,
                     }
                 )
             bbs.append(img_bbs)
@@ -133,12 +142,13 @@ class Detector(nn.Module):
 
         # If there is no bb, the first 4 channels will not influence the loss
         # -> can be any number (will be kept at 0 zero)
-        target = torch.zeros(5, 15, 20)
+        target = torch.zeros(self.head_out_channels, 15, 20)
         for ann in anns:
             x = ann["bbox"][0]
             y = ann["bbox"][1]
             width = ann["bbox"][2]
             height = ann["bbox"][3]
+            category = ann["category_id"]
 
             x_center = x + width / 2.0
             y_center = y + height / 2.0
@@ -152,12 +162,19 @@ class Detector(nn.Module):
             rel_height = height / self.img_height
 
             # channels, rows (y cells), cols (x cells)
-            target[4, y_ind, x_ind] = 1
+            target[4, y_ind, x_ind] = 1 # confidence
 
             # bb size
-            target[0, y_ind, x_ind] = x_cell_pos
-            target[1, y_ind, x_ind] = y_cell_pos
-            target[2, y_ind, x_ind] = rel_width
-            target[3, y_ind, x_ind] = rel_height
+            target[0, y_ind, x_ind] = x_cell_pos # x
+            target[1, y_ind, x_ind] = y_cell_pos # y
+            target[2, y_ind, x_ind] = rel_width # w
+            target[3, y_ind, x_ind] = rel_height # h
+
+            # positions 5-20 are for category
+            # one hot encoding at index 5-19,
+            # where 5 corresponds to category id 0
+            # category is id in [0,15]
+            target[5:19, y_ind, x_ind] = 0
+            target[category + 5, y_ind, x_ind] = 1
 
         return image, target
