@@ -3,6 +3,38 @@ import torch
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import json
+from PIL import Image, ImageDraw
+
+def add_bounding_boxes_pil(pil_image, bbs, category_dict=None):
+    """Add bounding boxes to PIL image.
+
+    Args:
+        pil_image (PIL.Image):
+            The image to add the bounding boxes to.
+        bbs (List[Dict]):
+            List of bounding boxes to display.
+            Each bounding box dict has the format as specified in
+            Detector.decode_output.
+        category_dict (Dict):
+            Map from category id to string to label bounding boxes.
+            No labels if None.
+    """
+    # print("bbs: ", bbs)
+    for bb in bbs:
+        # print("bb: ", bb)
+        draw = ImageDraw.Draw(pil_image)
+        top_left_corner = (bb["x"], bb["y"])
+        bottom_right_corner = (bb["x"] + bb["width"], bb["y"] + bb["height"])
+
+        shape = [top_left_corner, bottom_right_corner] 
+
+        draw.rectangle(shape, outline="red")
+
+        if category_dict is not None:
+            draw.text(top_left_corner, category_dict[bb["category"]]["name"], fill="black")
+
+    return pil_image
+
 
 
 def add_bounding_boxes(ax, bbs, category_dict=None):
