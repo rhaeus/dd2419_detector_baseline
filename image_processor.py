@@ -18,10 +18,12 @@ class ImageProcessor():
         self.detector = Detector().to(self.device)
 
         # load a trained model
-        self.detector = utils.load_model(self.detector, model_path, self.device)
+        if model_path is not None:
+            self.detector = utils.load_model(self.detector, model_path, self.device)
 
         # load category dictionary from annotation file
-        self.category_dict = utils.get_category_dict(ann_path)
+        if ann_path is not None:
+            self.category_dict = utils.get_category_dict(ann_path)
 
     def detect_and_classify(self, image, threshold):
         """ Gets an image as PIL image
