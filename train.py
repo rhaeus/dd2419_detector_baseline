@@ -34,18 +34,16 @@ def train(device="cpu"):
 
     dataset = CocoDetection(
         root="./dd2419_coco/training",
-        annFile="./dd2419_coco/annotations/training.json",
+        annFile="./dd2419_coco/annotations/augmented.json",
         transforms=detector.input_transform,
     )
 
-    category_dict = utils.get_category_dict('./dd2419_coco/annotations/training.json')
-
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=8, shuffle=True)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=6, shuffle=True)
 
     # training params
     max_iterations = wandb.config.max_iterations = 10000
     learning_rate = wandb.config.learning_rate = 1e-4
-    weight_reg = wandb.config.weight_reg = 1
+    weight_reg = wandb.config.weight_reg = 1.5
     weight_noobj = wandb.config.weight_noobj = 1
 
     # run name (to easily identify model later)
@@ -91,8 +89,8 @@ def train(device="cpu"):
 
             # compute loss
             reg_mse = nn.functional.mse_loss(
-                out[pos_indices[0], 0:19, pos_indices[1], pos_indices[2]],
-                target_batch[pos_indices[0], 0:19, pos_indices[1], pos_indices[2]],
+                out[pos_indices[0], 0:20, pos_indices[1], pos_indices[2]],
+                target_batch[pos_indices[0], 0:20, pos_indices[1], pos_indices[2]],
             )
             pos_mse = nn.functional.mse_loss(
                 out[pos_indices[0], 4, pos_indices[1], pos_indices[2]],
@@ -141,7 +139,7 @@ def train(device="cpu"):
                         )
 
                         # add bounding boxes
-                        utils.add_bounding_boxes(ax, bbs[i], category_dict)
+                        utils.add_bounding_boxes(ax, bbs[i])
 
                         wandb.log(
                             {"test_img_{i}".format(i=i): figure}, step=current_iteration
@@ -154,7 +152,7 @@ def train(device="cpu"):
 
     print("\nTraining completed (max iterations reached)")
 
-    model_path = "{}.pt".format(run_name)
+    model_path = "./trained_models/{}.pt".format(run_name)
     utils.save_model(detector, model_path)
     wandb.save(model_path)
 

@@ -8,8 +8,6 @@ import torch.nn as nn
 from torchvision import models
 from torchvision import transforms
 
-import numpy as np
-
 
 class Detector(nn.Module):
     """Baseline module for object detection."""
@@ -24,15 +22,13 @@ class Detector(nn.Module):
         self.features = models.mobilenet_v2(pretrained=True).features
         # output of mobilenet_v2 will be 1280x15x20 for 480x640 input images
 
-        self.head_out_channels = 20
-
         self.head = nn.Conv2d(
-            in_channels=1280, out_channels=self.head_out_channels, kernel_size=1
+            in_channels=1280, out_channels=20, kernel_size=1
         )
         # 1x1 Convolution to reduce channels to out_channels without changing H and W
 
-        # 1280x15x20 -> 5x15x20, where each element 5 channel tuple corresponds to
-        #   (rel_x_offset, rel_y_offset, rel_x_width, rel_y_height, confidence
+        # 1280x15x20 -> 20x15x20, where each element 20 channel tuple corresponds to
+        #   (rel_x_offset, rel_y_offset, rel_x_width, rel_y_height, confidence, signs probability
         # Where rel_x_offset, rel_y_offset is relative offset from cell_center
         # Where rel_x_width, rel_y_width is relative to image size
         # Where confidence is predicted IOU * probability of object center in this cell
@@ -40,7 +36,6 @@ class Detector(nn.Module):
         self.out_cells_y = 15.0
         self.img_height = 480.0
         self.img_width = 640.0
-        
 
     def forward(self, inp):
         """Forward pass.
@@ -73,7 +68,7 @@ class Detector(nn.Module):
                 - "y": Top-left corner row
                 - "width": Width of bounding box in pixel
                 - "height": Height of bounding box in pixel
-                - "category": Category (not implemented yet!)
+                - "category": Category 
         """
         bbs = []
         # decode bounding boxes for each image
@@ -98,19 +93,22 @@ class Detector(nn.Module):
                     self.img_width / self.out_cells_x * (bb_index[1] + bb_coeffs[0])
                     - width / 2.0
                 )
-
+                
                 category_one_hot = bb_coeffs = o[5:19, bb_index[0], bb_index[1]]
                 category = torch.argmax(category_one_hot).item()
+                category_conf = torch.max(category_one_hot).item()
 
-                img_bbs.append(
-                    {
-                        "width": width,
-                        "height": height,
-                        "x": x,
-                        "y": y,
-                        "category": category,
-                    }
-                )
+                if category_conf > 0.6 :
+                    img_bbs.append(
+                        {
+                            "width": width,
+                            "height": height,
+                            "x": x,
+                            "y": y,
+                            "category" : category,
+                            "category_conf" : category_conf,
+                        }
+                    )
             bbs.append(img_bbs)
 
         return bbs
@@ -142,7 +140,7 @@ class Detector(nn.Module):
 
         # If there is no bb, the first 4 channels will not influence the loss
         # -> can be any number (will be kept at 0 zero)
-        target = torch.zeros(self.head_out_channels, 15, 20)
+        target = torch.zeros(20, 15, 20)
         for ann in anns:
             x = ann["bbox"][0]
             y = ann["bbox"][1]
@@ -162,14 +160,14 @@ class Detector(nn.Module):
             rel_height = height / self.img_height
 
             # channels, rows (y cells), cols (x cells)
-            target[4, y_ind, x_ind] = 1 # confidence
+            target[4, y_ind, x_ind] = 1
 
             # bb size
-            target[0, y_ind, x_ind] = x_cell_pos # x
-            target[1, y_ind, x_ind] = y_cell_pos # y
-            target[2, y_ind, x_ind] = rel_width # w
-            target[3, y_ind, x_ind] = rel_height # h
-
+            target[0, y_ind, x_ind] = x_cell_pos
+            target[1, y_ind, x_ind] = y_cell_pos
+            target[2, y_ind, x_ind] = rel_width
+            target[3, y_ind, x_ind] = rel_height
+            
             # positions 5-20 are for category
             # one hot encoding at index 5-19,
             # where 5 corresponds to category id 0
