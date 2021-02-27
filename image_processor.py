@@ -68,3 +68,30 @@ class ImageProcessor():
         return utils.add_bounding_boxes_pil(pil_image, bbs, self.category_dict)
 
 
+    def reduce_bbx_nb(self, bbs):
+        """ Gets a list of bbs for an image and only keeps the best bbs for each sign (best confidence)
+        Returns another list of bbs"""
+        bbs_n =[]
+        for i in len(bbs):
+            #keep only the best bbox
+            if len(bbs[i])>1:
+                bbx=[bbs[i][0]]
+                for elem in bbs[i][1:]:
+                    i = False
+                    for box in bbx:
+                        #print('hehe')
+                        x_center_elem = elem['x'].item()-elem['width'].item()/2
+                        x_center_box = box['x'].item()-box['width'].item()/2
+                        y_center_elem = elem['y'].item()-elem['height'].item()/2
+                        y_center_box = box['y'].item()-box['height'].item()/2
+                        if ((y_center_elem-y_center_box)**2+(x_center_elem-x_center_box)**2)**(1/2) <100:
+                            if box['category_conf']<elem['category_conf']:
+                                bbx.remove(box)
+                                bbx.append(elem)
+                            i=True
+                    if i == False:
+                        bbx.append(elem)
+            else:
+                bbx = bbs[i].copy()
+            bbs_n.append(bbx)
+        return(bbs_n)
