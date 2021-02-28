@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import torch
 from detector import Detector
 import torchvision.transforms.functional as TF
-
+import math
 
 class ImageProcessor():
     def __init__(self, model_path, ann_path):
@@ -84,7 +84,7 @@ class ImageProcessor():
                         x_center_box = box['x'].item()-box['width'].item()/2
                         y_center_elem = elem['y'].item()-elem['height'].item()/2
                         y_center_box = box['y'].item()-box['height'].item()/2
-                        if ((y_center_elem-y_center_box)**2+(x_center_elem-x_center_box)**2)**(1/2) <100:
+                        if math.sqrt((y_center_elem-y_center_box)**2+(x_center_elem-x_center_box)**2) <70:
                             if box['category_conf']<elem['category_conf']:
                                 bbx.remove(box)
                                 bbx.append(elem)
