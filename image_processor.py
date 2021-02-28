@@ -72,7 +72,7 @@ class ImageProcessor():
         """ Gets a list of bbs for an image and only keeps the best bbs for each sign (best confidence)
         Returns another list of bbs"""
         bbs_n =[]
-        for i in len(bbs):
+        for i in range(len(bbs)):
             #keep only the best bbox
             if len(bbs[i])>1:
                 bbx=[bbs[i][0]]
@@ -92,6 +92,6 @@ class ImageProcessor():
                     if i == False:
                         bbx.append(elem)
             else:
-                bbx = bbs[i].copy()
+                bbx = bbs[i][:]
             bbs_n.append(bbx)
         return(bbs_n)
