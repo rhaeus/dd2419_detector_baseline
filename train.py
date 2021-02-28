@@ -33,8 +33,8 @@ def train(device="cpu"):
     wandb.watch(detector)
 
     dataset = CocoDetection(
-        root="../drive/MyDrive/Drone\ project/dd2419_coco/training",
-        annFile="../drive/MyDrive/Drone\ project/dd2419_coco/annotations/augmented.json",
+        root="../drive/MyDrive/Drone_project/training",
+        annFile="../drive/MyDrive/Drone_project/annotations/augmented.json",
         transforms=detector.input_transform,
     )
 
