@@ -68,7 +68,7 @@ class ImageProcessor():
         return utils.add_bounding_boxes_pil(pil_image, bbs, self.category_dict)
 
 
-    def reduce_bbx_nb(self, bbs):
+    def reduce_bbx_nb(self, bbs, dist_thres=100):
         """ Gets a list of bbs for an image and only keeps the best bbs for each sign (best confidence)
         Returns another list of bbs"""
         bbs_n =[]
@@ -84,7 +84,7 @@ class ImageProcessor():
                         x_center_box = box['x'].item()-box['width'].item()/2.0
                         y_center_elem = elem['y'].item()-elem['height'].item()/2.0
                         y_center_box = box['y'].item()-box['height'].item()/2.0
-                        if math.sqrt((y_center_elem-y_center_box)**2+(x_center_elem-x_center_box)**2) <70:
+                        if math.sqrt((y_center_elem-y_center_box)**2+(x_center_elem-x_center_box)**2) < dist_thres:
                             if box['category_conf']<elem['category_conf']:
                                 bbx.remove(box)
                                 bbx.append(elem)
