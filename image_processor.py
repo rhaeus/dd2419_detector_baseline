@@ -80,10 +80,10 @@ class ImageProcessor():
                     i = False
                     for box in bbx:
                         #print('hehe')
-                        x_center_elem = elem['x'].item()-elem['width'].item()/2
-                        x_center_box = box['x'].item()-box['width'].item()/2
-                        y_center_elem = elem['y'].item()-elem['height'].item()/2
-                        y_center_box = box['y'].item()-box['height'].item()/2
+                        x_center_elem = elem['x'].item()-elem['width'].item()/2.0
+                        x_center_box = box['x'].item()-box['width'].item()/2.0
+                        y_center_elem = elem['y'].item()-elem['height'].item()/2.0
+                        y_center_box = box['y'].item()-box['height'].item()/2.0
                         if math.sqrt((y_center_elem-y_center_box)**2+(x_center_elem-x_center_box)**2) <70:
                             if box['category_conf']<elem['category_conf']:
                                 bbx.remove(box)
