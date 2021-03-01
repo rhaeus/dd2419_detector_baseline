@@ -21,6 +21,8 @@ class ImageProcessor():
         if model_path is not None:
             self.detector = utils.load_model(self.detector, model_path, self.device)
 
+        self.detector.eval()
+
         # load category dictionary from annotation file
         if ann_path is not None:
             self.category_dict = utils.get_category_dict(ann_path)
