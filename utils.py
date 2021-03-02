@@ -31,7 +31,7 @@ def add_bounding_boxes_pil(pil_image, bbs, category_dict=None):
         draw.rectangle(shape, outline="red")
 
         if category_dict is not None:
-            draw.text(top_left_corner, category_dict[bb["category"]]["name"], fill="black")
+            draw.text(top_left_corner, category_dict[bb["category"]]["name"]+str(bb["category_conf"]), fill="black")
 
     return pil_image
 
