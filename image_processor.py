@@ -96,4 +96,13 @@ class ImageProcessor():
             else:
                 bbx = bbs[i][:]
             bbs_n.append(bbx)
+        #print(bbs_n)
+        bbxcopy = bbs_n[:]
+        #print(bbxcopy)
+        for elem in range(len(bbxcopy[0])) :
+            #print(bbxcopy[elem]['category_conf'])
+            if bbxcopy[0][elem]['category_conf']<0.9:
+                #print('remove',bbxcopy[elem]['category_conf'])
+                bbs_n[0].remove(bbxcopy[0][elem])
+        #print(bbs_n)
         return(bbs_n)

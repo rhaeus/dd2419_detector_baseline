@@ -8,7 +8,7 @@ import torch.nn as nn
 from torchvision import models
 from torchvision import transforms
 from math import exp
-import tensorflow as tf
+#import tensorflow as tf
 
 
 class Detector(nn.Module):
@@ -55,12 +55,11 @@ class Detector(nn.Module):
                 #    activ_features[i][j].append(1/(1-exp(j)))
         #print(type(tf.activations.sigmoid(features))
         #cpu_features = features.cpu()
-
         #new_features = tf.keras.activations.sigmoid(cpu_features.detach())
         #.to(torch.device("cuda"))
         #print(new_features.is_cuda())
         #out = self.head(new_features.cuda())  # Linear (i.e., no) activation
-        out = self.head(features)  # Linear (i.e., no) activation
+        out = self.head(features)
 
         return out
 

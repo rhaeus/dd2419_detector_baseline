@@ -50,13 +50,12 @@ def main():
                 extent=(0, 640, 480, 0),
                 alpha=0.7,
             )
-
+            
             #keep only the best bbox
             if len(bbs[i])>1:
                 
                 bbx=[bbs[i][0]]
                 for elem in bbs[i][1:]:
-                    
                     i = False
                     for box in bbx:
                         #print('hehe')
@@ -64,13 +63,33 @@ def main():
                         x_center_box = box['x'].item()-box['width'].item()/2
                         y_center_elem = elem['y'].item()-elem['height'].item()/2
                         y_center_box = box['y'].item()-box['height'].item()/2
+                        if math.sqrt((y_center_elem-y_center_box)**2+(x_center_elem-x_center_box)**2) <200:
+                        print('x_center_box', x_center_box)
+                        print('y_center_elem', y_center_elem)
+                        print('y_center_box', y_center_box)
+                        print(y_center_elem-y_center_box)
+                        print((y_center_elem-y_center_box)**2)
+                        print(x_center_elem-x_center_box)
+                
+                        print((y_center_elem-y_center_box)**2+(x_center_elem-x_center_box)**2)
+                        print('dist: ',math.sqrt((y_center_elem-y_center_box)**2+(x_center_elem-x_center_box)**2))
                         if math.sqrt((y_center_elem-y_center_box)**2+(x_center_elem-x_center_box)**2) <100:
+                            print('vi')
                             if box['category_conf']<elem['category_conf']:
                                 bbx.remove(box)
                                 bbx.append(elem)
+            
+            bbxcopy = bbx[:]
+            for elem in range(len(bbxcopy)) :
+                print(bbxcopy[elem]['category_conf'])
+                if bbxcopy[elem]['category_conf']<0.8:
+                    print('remove',bbxcopy[elem]['category_conf'])
+                    bbx.remove(bbxcopy[elem])
+
                             i=True
                     if i == False:
                         bbx.append(elem)
+                print(bbx)
                                 
             #        
             #    bbx = [max(bbs[i], key=lambda x:x['category_conf'])]
@@ -78,13 +97,6 @@ def main():
             else:
                 bbx = bbs[i][:]
             # add bounding boxes
-            
-            for elem in bbx :
-                print(elem['category_conf'])
-                if elem['category_conf']<0.8:
-                    print(elem['category_conf'])
-                    bbx.remove(elem)
-
             utils.add_bounding_boxes(ax, bbx, category_dict)
             
 
