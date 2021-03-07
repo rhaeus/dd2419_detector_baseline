@@ -45,12 +45,8 @@ class Detector(nn.Module):
         Compute output of neural network from input.
         """
         features = self.features(inp)
-        print(features.shape)
-        print(type(features[0]))
-        print(type(features[0][0]))
-        print(type(features[0][0][0]))
         #print(features[0])
-        activ_features = []
+        #activ_features = []
         #for i in features:
             #activ_features.append(tf.math.sigmoid(i.cpu()))
             #for j in i:
@@ -58,11 +54,13 @@ class Detector(nn.Module):
                 #for k in j :
                 #    activ_features[i][j].append(1/(1-exp(j)))
         #print(type(tf.activations.sigmoid(features))
-        cpu_features = features.cpu()
-        new_features = tf.keras.activations.sigmoid(cpu_features.detach())
+        #cpu_features = features.cpu()
+
+        #new_features = tf.keras.activations.sigmoid(cpu_features.detach())
         #.to(torch.device("cuda"))
         #print(new_features.is_cuda())
-        out = self.head(new_features.cuda())  # Linear (i.e., no) activation
+        #out = self.head(new_features.cuda())  # Linear (i.e., no) activation
+        out = self.head(features)  # Linear (i.e., no) activation
 
         return out
 

@@ -33,8 +33,8 @@ def train(device="cpu"):
     wandb.watch(detector)
 
     dataset = CocoDetection(
-        root="../drive/MyDrive/Drone_project/training",
-        annFile="../drive/MyDrive/Drone_project/annotations/augmented.json",
+        root="./dd2419_coco/training",
+        annFile="./dd2419_coco/annotations/augmented.json",
         transforms=detector.input_transform,
     )
 
@@ -43,8 +43,9 @@ def train(device="cpu"):
     # training params
     max_iterations = wandb.config.max_iterations = 10000
     learning_rate = wandb.config.learning_rate = 1e-4
-    weight_reg = wandb.config.weight_reg = 1.5
+    weight_reg = wandb.config.weight_reg = 3
     weight_noobj = wandb.config.weight_noobj = 1
+    weight_class = 3
 
     # run name (to easily identify model later)
     time_string = datetime.now().strftime("%Y-%m-%d_%H-%M-%S-%f")
@@ -89,8 +90,12 @@ def train(device="cpu"):
 
             # compute loss
             reg_mse = nn.functional.mse_loss(
-                out[pos_indices[0], 0:20, pos_indices[1], pos_indices[2]],
-                target_batch[pos_indices[0], 0:20, pos_indices[1], pos_indices[2]],
+                out[pos_indices[0], 0:4, pos_indices[1], pos_indices[2]],
+                target_batch[pos_indices[0], 0:4, pos_indices[1], pos_indices[2]],
+            )
+            reg_mse_class = nn.functional.mse_loss(
+                out[pos_indices[0], 5:20, pos_indices[1], pos_indices[2]],
+                target_batch[pos_indices[0], 5:20, pos_indices[1], pos_indices[2]],
             )
             pos_mse = nn.functional.mse_loss(
                 out[pos_indices[0], 4, pos_indices[1], pos_indices[2]],
@@ -100,7 +105,7 @@ def train(device="cpu"):
                 out[neg_indices[0], 4, neg_indices[1], neg_indices[2]],
                 target_batch[neg_indices[0], 4, neg_indices[1], neg_indices[2]],
             )
-            loss = pos_mse + weight_reg * reg_mse + weight_noobj * neg_mse
+            loss = pos_mse + weight_reg * reg_mse + weight_noobj * neg_mse + weight_class * reg_mse_class
 
             # optimize
             optimizer.zero_grad()
