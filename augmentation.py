@@ -9,10 +9,11 @@ from PIL import Image
 
 def main():
 
-    annFile="./dd2419_coco/annotations/training.json"
+    annFile="./dd2419_coco/annotations/newdata.json"
     with open(annFile) as json_file: 
         data1 = json.load(json_file)
 
+    index = data1["images"][-1]["id"]
     for image in range(0,len(data1["annotations"])):
         data = data1.copy()
         #get image path
@@ -42,7 +43,7 @@ def main():
         #im = np.array(Image.open(imgFile_path).convert('L'))
 
         #new dict for image info
-        nb=1258+image
+        nb=index+image
         imgdict = {"id":nb , "width": 640, "height": 480, "file_name": "cr_"+imgFile}
 
         #add it in data
@@ -77,7 +78,7 @@ def main():
             img1 = img_o.transform(img_o.size, Image.AFFINE, [a, b, c, d, e, f], resample=Image.BILINEAR, fillcolor=(255,255,255))
 
             #new dict for image info
-            nb1=1258+1258+image
+            nb1=2*index+image
             imgdict = {"id":nb1 , "width": 640, "height": 480, "file_name": "tr_"+imgFile}
 
             #add it in data
@@ -104,11 +105,11 @@ def main():
             d = 0
             e = 1
             f = -100 #up/down (i.e. 5/-5)
-            img1 = img_o.transform(img_o.size, Image.AFFINE, [a, b, c, d, e, f], resample=Image.BILINEAR, fillcolor=(0,0,0))
+            img2 = img_o.transform(img_o.size, Image.AFFINE, [a, b, c, d, e, f], resample=Image.BILINEAR, fillcolor=(0,0,0))
 
             #new dict for image info
-            nb2=1258+1258+1258+image
-            imgdict = {"id":nb2 , "width": 640, "height": 480, "file_name": "tr_"+imgFile}
+            nb2=3*index+image
+            imgdict = {"id":nb2 , "width": 640, "height": 480, "file_name": "tr1_"+imgFile}
 
             #add it in data
             data["images"].append(imgdict)
@@ -123,7 +124,7 @@ def main():
             data["annotations"].append(bboxdict)
 
             #save new file
-            img1.save("./dd2419_coco/training/tr_"+imgFile)
+            img2.save("./dd2419_coco/training/tr1_"+imgFile)
             
 
     #save new .json annotation file
