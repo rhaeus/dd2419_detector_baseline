@@ -13,7 +13,7 @@ def main():
     # Init model
     detector = Detector().to(device)
     # load a trained model
-    detector = utils.load_model(detector, './trained_models/all_signs.pt', device)
+    detector = utils.load_model(detector, './trained_models/all_signs_best.pt', device)
     category_dict = utils.get_category_dict('./dd2419_coco/annotations/training.json')
     
     # load test images
@@ -54,7 +54,7 @@ def main():
                         x_center_box = box['x'].item()-box['width'].item()/2
                         y_center_elem = elem['y'].item()-elem['height'].item()/2
                         y_center_box = box['y'].item()-box['height'].item()/2
-                        if math.sqrt((y_center_elem-y_center_box)**2+(x_center_elem-x_center_box)**2) <200:
+                        if math.sqrt((y_center_elem-y_center_box)**2+(x_center_elem-x_center_box)**2) <300 and box['category']==elem['category']:
                             if box['category_conf']<elem['category_conf']:
                                 bbx.remove(box)
                                 bbx.append(elem)
@@ -73,7 +73,7 @@ def main():
             bbxcopy = bbx[:]
             for elem in range(len(bbxcopy)) :
                 #print(bbxcopy[elem]['category_conf'])
-                if bbxcopy[elem]['category_conf']<0.7:
+                if bbxcopy[elem]['category_conf']<0.5:
                     #print('remove',bbxcopy[elem]['category_conf'])
                     bbx.remove(bbxcopy[elem])
 

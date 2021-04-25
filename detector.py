@@ -110,7 +110,7 @@ class Detector(nn.Module):
                     - width / 2.0
                 )
                 
-                category_one_hot = bb_coeffs = o[5:19, bb_index[0], bb_index[1]]
+                category_one_hot = bb_coeffs = o[5:20, bb_index[0], bb_index[1]]
                 category = torch.argmax(category_one_hot).item()
                 category_conf = torch.max(category_one_hot).item()
 
